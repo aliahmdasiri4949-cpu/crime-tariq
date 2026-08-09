@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>المحقق طارق - لوحة القضية</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="hub-body">
+    <div class="overlay"></div>
+    <div class="hub-container" style="padding-top: 40px; margin-bottom: 50px;">
+        
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h1 style="color: var(--accent-red); text-shadow: 0 0 10px rgba(230,57,70,0.5);"><i class="fas fa-folder-open"></i> ملف القضية</h1>
+            <a href="cases_hub.html" class="btn btn-dark" style="width: auto; padding: 8px 15px;"><i class="fas fa-home"></i> العودة</a>
+        </div>
+
+        <div class="case-card" style="margin-bottom: 30px;">
+            <div class="case-header">
+                <span class="badge" id="dashboardCaseId">CASE #</span>
+            </div>
+            <div class="case-body">
+                <h2 id="dashboardCaseTitle" style="font-size: 28px; margin-bottom: 15px;">جاري التحميل...</h2>
+                <p id="dashboardCaseDesc" style="color: #cbd5e1; font-size: 15px; line-height: 1.6;"></p>
+            </div>
+        </div>
+
+        <h3 style="color: var(--text-secondary); margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">
+            <i class="fas fa-users"></i> المشتبه بهم
+        </h3>
+        
+        <div id="suspectsList" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 20px;">
+            <!-- Suspects will be injected here -->
+        </div>
+
+    </div>
+
+    <script src="cases_data.js"></script>
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const caseId = urlParams.get('case') || '1';
+        const caseInfo = casesData[caseId];
+
+        if(caseInfo) {
+            document.getElementById('dashboardCaseId').textContent = 'CASE #0' + caseId;
+            document.getElementById('dashboardCaseTitle').textContent = caseInfo.title;
+            document.getElementById('dashboardCaseDesc').textContent = caseInfo.description;
+
+            const suspectsList = document.getElementById('suspectsList');
+            caseInfo.suspects.forEach((suspect, index) => {
+                const card = document.createElement('div');
+                card.className = 'case-card suspect-card-anim';
+                card.style.display = 'flex';
+                card.style.justifyContent = 'space-between';
+                card.style.alignItems = 'center';
+                card.style.animationDelay = `${index * 0.1}s`;
+                
+                card.innerHTML = `
+                    <div style="display: flex; gap: 15px; align-items: center; max-width: 70%;">
+                        <img src="${suspect.avatar}" alt="${suspect.name}" style="width: 70px; height: 70px; border-radius: 10px; object-fit: cover; border: 2px solid var(--border-color);">
+                        <div>
+                            <h3 style="margin-bottom: 5px; font-size: 18px;">${suspect.name} <span style="font-size: 13px; color: var(--accent-red); font-weight: normal;">(${suspect.role})</span></h3>
+                            <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.4;">${suspect.desc}</p>
+                        </div>
+                    </div>
+                    <a href="chat.html?case=${caseId}&suspect=${suspect.id}" class="btn btn-red" style="width: auto; padding: 10px 15px; font-size: 13px; white-space: nowrap;"><i class="fas fa-comments"></i> استجواب</a>
+                `;
+                suspectsList.appendChild(card);
+            });
+        }
+    </script>
+</body>
+</html>

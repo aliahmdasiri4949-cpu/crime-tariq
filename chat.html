@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>المحقق طارق - غرفة التحقيق</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="chat-body">
+    <div class="overlay"></div>
+
+    <!-- Case Closed Overlay -->
+    <div id="caseClosedOverlay" class="case-closed-overlay" style="display: none;">
+        <div class="case-closed-content">
+            <h1 class="case-closed-title">CASE CLOSED</h1>
+            <p class="case-closed-subtitle">تم إغلاق القضية وإحالة المتهم للمحكمة</p>
+            <a href="index.html" class="btn btn-red" style="margin-top: 20px;"><i class="fas fa-home"></i> العودة للرئيسية</a>
+        </div>
+    </div>
+
+    <div class="app-container">
+        <!-- Hidden YouTube Player for Background Music -->
+        <div id="ytPlayer" style="position: absolute; width: 0; height: 0; border: 0; overflow: hidden; opacity: 0; pointer-events: none;"></div>
+        
+        <header class="chat-header">
+            <div class="profile-info">
+                <a href="#" id="backToDashboardBtn" class="icon-btn back-btn"><i class="fas fa-arrow-right"></i></a>
+                <div class="avatar">
+                    <img src="" alt="المشتبه به" id="suspectImage">
+                    <div class="status-indicator"></div>
+                </div>
+                <div class="user-details">
+                    <h2 id="suspectName">جاري التحميل...</h2>
+                    <p class="status-text">طبيعي وهادئ</p>
+                </div>
+            </div>
+            <div class="actions" style="display: flex; align-items: center; gap: 10px;">
+                <div style="display: flex; align-items: center; gap: 5px;">
+                    <button class="icon-btn" id="toggleAudioBtn" title="تشغيل/إيقاف الموسيقى"><i class="fas fa-volume-mute"></i></button>
+                    <input type="range" id="volumeSlider" min="0" max="1" step="0.05" value="0.2" style="width: 60px; cursor: pointer;">
+                </div>
+                <span id="caseName" style="color: var(--text-secondary); font-size: 12px; margin-left: 10px;">القضية</span>
+                <button class="icon-btn" onclick="location.reload()" title="إعادة تشغيل المحادثة (فقدان السجل)"><i class="fas fa-redo"></i></button>
+            </div>
+        </header>
+        
+        <main class="chat-area" id="chatArea">
+            <div class="message-wrapper system-message">
+                <p id="systemGreeting">بدأ التحقيق...</p>
+            </div>
+        </main>
+        
+        <footer class="input-area" id="inputFooter">
+            <div class="input-wrapper">
+                <button class="icon-btn attach-btn"><i class="fas fa-search"></i></button>
+                <input type="text" id="userInput" placeholder="اكتب سؤالك للمشتبه به هنا بالعامية..." autocomplete="off">
+                <button class="icon-btn send-btn" id="sendBtn"><i class="fas fa-paper-plane"></i></button>
+            </div>
+        </footer>
+
+        <!-- Action Area (Hidden by default, shown when guilty confesses) -->
+        <div id="arrestArea" class="action-area" style="display: none;">
+            <button id="arrestBtn" class="btn btn-red w-full arrest-btn"><i class="fas fa-gavel"></i> إحالة إلى المحكمة والسجن</button>
+        </div>
+    </div>
+    
+    <script src="https://www.youtube.com/iframe_api"></script>
+    <script src="cases_data.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

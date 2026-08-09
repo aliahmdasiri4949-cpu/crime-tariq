@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>المحقق طارق - لوحة القضايا</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="hub-body">
+    <div class="overlay"></div>
+    
+    <div class="hub-container">
+        <header class="hub-header">
+            <h1 class="hub-title">الملفات الجارية</h1>
+            <p class="hub-subtitle">اختر قضية للبدء في التحقيق</p>
+        </header>
+
+        <div class="corkboard" id="corkboard">
+            <!-- Cases will be dynamically injected here -->
+        </div>
+    </div>
+
+    <script src="cases_data.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const corkboard = document.getElementById('corkboard');
+            
+            // Group cases by category
+            const categories = {};
+            for (const [id, caseInfo] of Object.entries(casesData)) {
+                if (!categories[caseInfo.category]) {
+                    categories[caseInfo.category] = [];
+                }
+                categories[caseInfo.category].push({ id, ...caseInfo });
+            }
+
+            // Render categories and cards
+            for (const [categoryName, cases] of Object.entries(categories)) {
+                
+                // Category Header
+                const catHeader = document.createElement('div');
+                catHeader.className = 'category-header';
+                catHeader.innerHTML = `
+                    <div class="cat-icon"><i class="fas ${categoryName === 'العصور القديمة' ? 'fa-landmark' : 'fa-building'}"></i></div>
+                    <div class="cat-title-area">
+                        <h3>${categoryName}</h3>
+                        <p>${cases[0].categoryDesc}</p>
+                    </div>
+                `;
+                corkboard.appendChild(catHeader);
+
+                // Cases Grid for this category
+                const grid = document.createElement('div');
+                grid.className = 'cases-grid';
+
+                cases.forEach(c => {
+                    const card = document.createElement('div');
+                    card.className = 'case-card';
+                    card.onclick = () => window.location.href = `case_dashboard.html?case=${c.id}`;
+                    
+                    let difficultyColor = c.difficulty.includes('صعب') ? 'var(--accent-red)' : (c.difficulty.includes('متوسط') ? 'var(--accent-yellow)' : '#10b981');
+
+                    // Small suspect avatars HTML
+                    let avatarsHtml = c.suspects.map(s => `<img src="${s.avatar}" class="small-avatar" title="${s.name}">`).join('');
+
+                    card.innerHTML = `
+                        <div class="card-pin"></div>
+                        <div class="card-badges">
+                            ${c.isNew ? '<span class="badge new-badge">جديدة</span>' : ''}
+                            <span class="badge diff-badge" style="color: ${difficultyColor}; border-color: ${difficultyColor};">صعوبة: ${c.difficulty}</span>
+                        </div>
+                        <h2 class="card-title">${c.title}</h2>
+                        <p class="card-desc">${c.description}</p>
+                        
+                        <div class="card-footer">
+                            <div class="suspects-mini">
+                                ${avatarsHtml}
+                            </div>
+                            <div class="action-text">
+                                <span>افتح الملف <i class="fas fa-folder-open"></i></span>
+                            </div>
+                        </div>
+                    `;
+                    grid.appendChild(card);
+                });
+
+                corkboard.appendChild(grid);
+            }
+        });
+    </script>
+</body>
+</html>
