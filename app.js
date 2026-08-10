@@ -238,7 +238,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // GEMINI API KEY - Updated key
-    const API_KEY = "AQ.Ab8RN6Je9ezjNArIAWXqqpM23qe9u5YZKkcCD51jLxdCM1pHFQ";
+    const API_KEY = "AQ.Ab8RN6IhU4kDxK3nG2TMWhh9tbcNhFG_0TqsTfDQ3uKosPTlnA";
     
     // Get case and suspect IDs from URL
     const urlParams = new URLSearchParams(window.location.search);
@@ -400,7 +400,7 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         try {
-            const response = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent?key=" + API_KEY, {
+            const response = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" + API_KEY, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
