@@ -42,6 +42,10 @@
             <!-- Suspects will be injected here -->
         </div>
 
+        <audio id="audio-gunshot" src="audio/gunshot.mp3"></audio>
+        <audio id="audio-glass_break" src="audio/glass_break.mp3"></audio>
+        <audio id="audio-car_sound" src="audio/car_sound.mp3"></audio>
+
     </div>
 
     <script src="cases_data.js?v=3"></script>
@@ -80,148 +84,32 @@
             // Audio Evidence Logic
             const playEvidenceBtn = document.getElementById('playEvidenceBtn');
             const evidenceHint = document.getElementById('evidenceHint');
-            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             
             playEvidenceBtn.addEventListener('click', () => {
-                audioCtx.resume();
-                playEvidenceBtn.disabled = true;
-                evidenceHint.textContent = "جاري التشغيل...";
+                const type = caseInfo.evidenceType || 'gunshot';
+                const audioEl = document.getElementById('audio-' + type);
                 
-                const type = caseInfo.evidenceType || 'voices';
-                
-                if (type === 'gunshot') {
-                    playGunshot();
-                } else if (type === 'stab') {
-                    playStab();
-                } else if (type === 'glass_break') {
-                    playGlassBreak();
-                } else if (type === 'door_knock') {
-                    playDoorKnock();
-                } else {
-                    playVoices(caseInfo.evidencePhrase || "لا تفعل ذلك!");
+                if (audioEl) {
+                    playEvidenceBtn.disabled = true;
+                    evidenceHint.textContent = "جاري التشغيل...";
+                    audioEl.currentTime = 0;
+                    audioEl.play().catch(e => {
+                        console.error('Audio play failed:', e);
+                        alert('عفواً، تأكد من إضافة ملفات الصوت الحقيقية في مجلد audio');
+                    });
+                    
+                    audioEl.onended = () => {
+                        playEvidenceBtn.disabled = false;
+                        evidenceHint.textContent = "(انتهى التشغيل)";
+                    };
+                    
+                    // Fallback in case onended doesn't fire
+                    setTimeout(() => {
+                        playEvidenceBtn.disabled = false;
+                        evidenceHint.textContent = "(انتهى التشغيل)";
+                    }, 5000);
                 }
-
-                setTimeout(() => {
-                    playEvidenceBtn.disabled = false;
-                    evidenceHint.textContent = "(انتهى التشغيل)";
-                }, 3000);
             });
-
-            function playGunshot() {
-                const bufferSize = audioCtx.sampleRate * 1.5; // 1.5 seconds
-                const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
-                const data = buffer.getChannelData(0);
-                for (let i = 0; i < bufferSize; i++) {
-                    data[i] = Math.random() * 2 - 1;
-                }
-                const noise = audioCtx.createBufferSource();
-                noise.buffer = buffer;
-                
-                const filter = audioCtx.createBiquadFilter();
-                filter.type = 'lowpass';
-                filter.frequency.setValueAtTime(4000, audioCtx.currentTime);
-                filter.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.5);
-                
-                const gainNode = audioCtx.createGain();
-                gainNode.gain.setValueAtTime(2.0, audioCtx.currentTime);
-                gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.8);
-                
-                noise.connect(filter);
-                filter.connect(gainNode);
-                gainNode.connect(audioCtx.destination);
-                noise.start();
-            }
-
-            function playStab() {
-                // Swish noise
-                const osc = audioCtx.createOscillator();
-                osc.type = 'triangle';
-                osc.frequency.setValueAtTime(800, audioCtx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(50, audioCtx.currentTime + 0.2);
-                
-                const gainNode = audioCtx.createGain();
-                gainNode.gain.setValueAtTime(0.8, audioCtx.currentTime);
-                gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
-                
-                osc.connect(gainNode);
-                gainNode.connect(audioCtx.destination);
-                osc.start();
-                osc.stop(audioCtx.currentTime + 0.3);
-                
-                // Thud
-                setTimeout(() => {
-                    const thudOsc = audioCtx.createOscillator();
-                    thudOsc.type = 'sine';
-                    thudOsc.frequency.setValueAtTime(150, audioCtx.currentTime);
-                    thudOsc.frequency.exponentialRampToValueAtTime(40, audioCtx.currentTime + 0.2);
-                    
-                    const thudGain = audioCtx.createGain();
-                    thudGain.gain.setValueAtTime(1.5, audioCtx.currentTime);
-                    thudGain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
-                    
-                    thudOsc.connect(thudGain);
-                    thudGain.connect(audioCtx.destination);
-                    thudOsc.start();
-                    thudOsc.stop(audioCtx.currentTime + 0.3);
-                }, 150);
-            }
-
-            function playGlassBreak() {
-                const bufferSize = audioCtx.sampleRate * 0.5;
-                const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
-                const data = buffer.getChannelData(0);
-                for (let i = 0; i < bufferSize; i++) {
-                    data[i] = Math.random() * 2 - 1;
-                }
-                const noise = audioCtx.createBufferSource();
-                noise.buffer = buffer;
-                
-                const filter = audioCtx.createBiquadFilter();
-                filter.type = 'highpass';
-                filter.frequency.value = 5000;
-                
-                const gainNode = audioCtx.createGain();
-                gainNode.gain.setValueAtTime(1.5, audioCtx.currentTime);
-                gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
-                
-                noise.connect(filter);
-                filter.connect(gainNode);
-                gainNode.connect(audioCtx.destination);
-                noise.start();
-            }
-
-            function playDoorKnock() {
-                let time = audioCtx.currentTime;
-                for (let i = 0; i < 3; i++) {
-                    const osc = audioCtx.createOscillator();
-                    osc.type = 'sine';
-                    osc.frequency.setValueAtTime(100, time);
-                    osc.frequency.exponentialRampToValueAtTime(40, time + 0.1);
-                    
-                    const gainNode = audioCtx.createGain();
-                    gainNode.gain.setValueAtTime(1.5, time);
-                    gainNode.gain.exponentialRampToValueAtTime(0.01, time + 0.1);
-                    
-                    osc.connect(gainNode);
-                    gainNode.connect(audioCtx.destination);
-                    osc.start(time);
-                    osc.stop(time + 0.1);
-                    time += 0.25; // delay between knocks
-                }
-            }
-
-            function playVoices(phrase) {
-                if ('speechSynthesis' in window) {
-                    const msg = new SpeechSynthesisUtterance();
-                    msg.text = phrase;
-                    msg.lang = 'ar-SA';
-                    msg.rate = 1.1; 
-                    msg.pitch = 0.5; // lower pitch to sound less robotic
-                    window.speechSynthesis.speak(msg);
-                } else {
-                    playGunshot();
-                }
-            }
         }
     </script>
 </body>
