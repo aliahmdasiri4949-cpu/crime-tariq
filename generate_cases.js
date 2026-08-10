@@ -20,6 +20,8 @@ const roles = [
     "سكرتير", "مساعد شخصي", "مستشار", "مهندس معماري", "شريك مؤسس", "محاسب", "مدير الموارد البشرية"
 ];
 
+const evidenceTypes = ['gunshot', 'stab', 'voices'];
+
 const caseTemplates = [
     { title: "جريمة القطار السريع", desc: "حدثت جريمة قتل غامضة في القطار المتجه للرياض. الضحية رجل أعمال مشهور، والمشتبه بهم كانوا معه في نفس المقطورة." },
     { title: "سرقة المخطوطة الأثرية", desc: "مخطوطة نادرة اختفت من المكتبة الوطنية. الكاميرات تعطلت لمدة 5 دقائق فقط، والباب الرئيسي لم يكسر." },
@@ -102,6 +104,7 @@ for (let cat of categories) {
             price: Math.floor(Math.random() * 100),
             isNew: Math.random() > 0.5,
             description: template.desc,
+            evidenceType: getRandom(evidenceTypes),
             suspects: suspects
         };
         caseIdCounter++;

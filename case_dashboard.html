@@ -17,13 +17,17 @@
             <a href="cases_hub.html" class="btn btn-dark" style="width: auto; padding: 8px 15px;"><i class="fas fa-home"></i> العودة</a>
         </div>
 
-        <div class="case-card" style="margin-bottom: 30px;">
+        <div class="case-card" style="margin-bottom: 30px; position: relative;">
             <div class="case-header">
                 <span class="badge" id="dashboardCaseId">CASE #</span>
             </div>
             <div class="case-body">
                 <h2 id="dashboardCaseTitle" style="font-size: 28px; margin-bottom: 15px;">جاري التحميل...</h2>
                 <p id="dashboardCaseDesc" style="color: #cbd5e1; font-size: 15px; line-height: 1.6;"></p>
+                <div style="margin-top: 20px;">
+                    <button id="playEvidenceBtn" class="btn btn-red" style="width: auto; padding: 10px 20px; font-size: 14px;"><i class="fas fa-headphones"></i> استمع للدليل الصوتي</button>
+                    <span id="evidenceHint" style="font-size: 12px; color: var(--text-secondary); margin-right: 10px;">(اضغط للاستماع)</span>
+                </div>
             </div>
         </div>
 
@@ -69,6 +73,106 @@
                 `;
                 suspectsList.appendChild(card);
             });
+
+            // Audio Evidence Logic
+            const playEvidenceBtn = document.getElementById('playEvidenceBtn');
+            const evidenceHint = document.getElementById('evidenceHint');
+            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            
+            playEvidenceBtn.addEventListener('click', () => {
+                audioCtx.resume();
+                playEvidenceBtn.disabled = true;
+                evidenceHint.textContent = "جاري التشغيل...";
+                
+                const type = caseInfo.evidenceType || 'voices';
+                
+                if (type === 'gunshot') {
+                    playGunshot();
+                } else if (type === 'stab') {
+                    playStab();
+                } else {
+                    playVoices();
+                }
+
+                setTimeout(() => {
+                    playEvidenceBtn.disabled = false;
+                    evidenceHint.textContent = "(انتهى التشغيل)";
+                }, 3000);
+            });
+
+            function playGunshot() {
+                const bufferSize = audioCtx.sampleRate * 1.5; // 1.5 seconds
+                const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+                const data = buffer.getChannelData(0);
+                for (let i = 0; i < bufferSize; i++) {
+                    data[i] = Math.random() * 2 - 1;
+                }
+                const noise = audioCtx.createBufferSource();
+                noise.buffer = buffer;
+                
+                const filter = audioCtx.createBiquadFilter();
+                filter.type = 'lowpass';
+                filter.frequency.setValueAtTime(4000, audioCtx.currentTime);
+                filter.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.5);
+                
+                const gainNode = audioCtx.createGain();
+                gainNode.gain.setValueAtTime(2.0, audioCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.8);
+                
+                noise.connect(filter);
+                filter.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+                noise.start();
+            }
+
+            function playStab() {
+                // Swish noise
+                const osc = audioCtx.createOscillator();
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(50, audioCtx.currentTime + 0.2);
+                
+                const gainNode = audioCtx.createGain();
+                gainNode.gain.setValueAtTime(0.8, audioCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+                
+                osc.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.3);
+                
+                // Thud
+                setTimeout(() => {
+                    const thudOsc = audioCtx.createOscillator();
+                    thudOsc.type = 'sine';
+                    thudOsc.frequency.setValueAtTime(150, audioCtx.currentTime);
+                    thudOsc.frequency.exponentialRampToValueAtTime(40, audioCtx.currentTime + 0.2);
+                    
+                    const thudGain = audioCtx.createGain();
+                    thudGain.gain.setValueAtTime(1.5, audioCtx.currentTime);
+                    thudGain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+                    
+                    thudOsc.connect(thudGain);
+                    thudGain.connect(audioCtx.destination);
+                    thudOsc.start();
+                    thudOsc.stop(audioCtx.currentTime + 0.3);
+                }, 150);
+            }
+
+            function playVoices() {
+                if ('speechSynthesis' in window) {
+                    const msg = new SpeechSynthesisUtterance();
+                    const phrases = ["لا تفعل ذلك!", "أين الخزنة؟", "اسرع قبل أن يأتوا!", "لقد انتهى الأمر", "ماذا فعلت؟"];
+                    msg.text = phrases[Math.floor(Math.random() * phrases.length)];
+                    msg.lang = 'ar-SA';
+                    msg.rate = 1.2; // faster, panicked
+                    msg.pitch = Math.random() > 0.5 ? 0.5 : 1.5; // disguise voice
+                    window.speechSynthesis.speak(msg);
+                } else {
+                    // Fallback to static noise if speech synthesis not supported
+                    playGunshot();
+                }
+            }
         }
     </script>
 </body>
