@@ -237,8 +237,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // ==========================================
 
 
-    // GEMINI API KEY - Back to original working key
-    const API_KEY = "AQ.Ab8RN6L1B0dw70ki_GVD-xQBMaoRwjfry8dOrgrhM5EEPlGKSw";
+    // GEMINI API KEY - Updated key
+    const API_KEY = "AQ.Ab8RN6Je9ezjNArIAWXqqpM23qe9u5YZKkcCD51jLxdCM1pHFQ";
     
     // Get case and suspect IDs from URL
     const urlParams = new URLSearchParams(window.location.search);
