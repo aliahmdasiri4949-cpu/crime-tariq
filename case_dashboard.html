@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>المحقق طارق - لوحة القضية</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
@@ -41,7 +44,7 @@
 
     </div>
 
-    <script src="cases_data.js"></script>
+    <script src="cases_data.js?v=3"></script>
     <script>
         const urlParams = new URLSearchParams(window.location.search);
         const caseId = urlParams.get('case') || '1';
@@ -90,8 +93,12 @@
                     playGunshot();
                 } else if (type === 'stab') {
                     playStab();
+                } else if (type === 'glass_break') {
+                    playGlassBreak();
+                } else if (type === 'door_knock') {
+                    playDoorKnock();
                 } else {
-                    playVoices();
+                    playVoices(caseInfo.evidencePhrase || "لا تفعل ذلك!");
                 }
 
                 setTimeout(() => {
@@ -159,17 +166,59 @@
                 }, 150);
             }
 
-            function playVoices() {
+            function playGlassBreak() {
+                const bufferSize = audioCtx.sampleRate * 0.5;
+                const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+                const data = buffer.getChannelData(0);
+                for (let i = 0; i < bufferSize; i++) {
+                    data[i] = Math.random() * 2 - 1;
+                }
+                const noise = audioCtx.createBufferSource();
+                noise.buffer = buffer;
+                
+                const filter = audioCtx.createBiquadFilter();
+                filter.type = 'highpass';
+                filter.frequency.value = 5000;
+                
+                const gainNode = audioCtx.createGain();
+                gainNode.gain.setValueAtTime(1.5, audioCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+                
+                noise.connect(filter);
+                filter.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+                noise.start();
+            }
+
+            function playDoorKnock() {
+                let time = audioCtx.currentTime;
+                for (let i = 0; i < 3; i++) {
+                    const osc = audioCtx.createOscillator();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(100, time);
+                    osc.frequency.exponentialRampToValueAtTime(40, time + 0.1);
+                    
+                    const gainNode = audioCtx.createGain();
+                    gainNode.gain.setValueAtTime(1.5, time);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, time + 0.1);
+                    
+                    osc.connect(gainNode);
+                    gainNode.connect(audioCtx.destination);
+                    osc.start(time);
+                    osc.stop(time + 0.1);
+                    time += 0.25; // delay between knocks
+                }
+            }
+
+            function playVoices(phrase) {
                 if ('speechSynthesis' in window) {
                     const msg = new SpeechSynthesisUtterance();
-                    const phrases = ["لا تفعل ذلك!", "أين الخزنة؟", "اسرع قبل أن يأتوا!", "لقد انتهى الأمر", "ماذا فعلت؟"];
-                    msg.text = phrases[Math.floor(Math.random() * phrases.length)];
+                    msg.text = phrase;
                     msg.lang = 'ar-SA';
-                    msg.rate = 1.2; // faster, panicked
-                    msg.pitch = Math.random() > 0.5 ? 0.5 : 1.5; // disguise voice
+                    msg.rate = 1.1; 
+                    msg.pitch = 0.5; // lower pitch to sound less robotic
                     window.speechSynthesis.speak(msg);
                 } else {
-                    // Fallback to static noise if speech synthesis not supported
                     playGunshot();
                 }
             }

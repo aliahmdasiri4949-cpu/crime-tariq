@@ -20,7 +20,8 @@ const roles = [
     "سكرتير", "مساعد شخصي", "مستشار", "مهندس معماري", "شريك مؤسس", "محاسب", "مدير الموارد البشرية"
 ];
 
-const evidenceTypes = ['gunshot', 'stab', 'voices'];
+const evidenceTypes = ['gunshot', 'stab', 'voices', 'glass_break', 'door_knock'];
+const voicePhrases = ["لا تفعل ذلك!", "أين الخزنة؟", "اسرع قبل أن يأتوا!", "لقد انتهى الأمر", "ماذا فعلت؟", "لا يوجد مفر", "أعطني المال"];
 
 const caseTemplates = [
     { title: "جريمة القطار السريع", desc: "حدثت جريمة قتل غامضة في القطار المتجه للرياض. الضحية رجل أعمال مشهور، والمشتبه بهم كانوا معه في نفس المقطورة." },
@@ -96,6 +97,9 @@ for (let cat of categories) {
             });
         }
         
+        const assignedEvidenceType = getRandom(evidenceTypes);
+        const assignedPhrase = assignedEvidenceType === 'voices' ? getRandom(voicePhrases) : null;
+        
         casesData[caseIdCounter.toString()] = {
             category: cat.name,
             categoryDesc: cat.desc,
@@ -104,7 +108,8 @@ for (let cat of categories) {
             price: Math.floor(Math.random() * 100),
             isNew: Math.random() > 0.5,
             description: template.desc,
-            evidenceType: getRandom(evidenceTypes),
+            evidenceType: assignedEvidenceType,
+            evidencePhrase: assignedPhrase,
             suspects: suspects
         };
         caseIdCounter++;
